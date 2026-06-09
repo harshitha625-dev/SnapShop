@@ -1,0 +1,22 @@
+# ── Core ML ──────────────────────────────────────────────────
+torch>=2.0.0                # PyTorch — GPU support included
+open-clip-torch>=2.24.0    # CLIP model (OpenAI ViT-B-32)
+faiss-gpu>=1.7.4            # FAISS with GPU support
+                            # CPU-only alternative: faiss-cpu
+
+# ── Image processing ─────────────────────────────────────────
+Pillow>=10.0.0
+requests>=2.31.0
+
+# ── Backend ──────────────────────────────────────────────────
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.12   # for file uploads
+pydantic>=2.8.0
+pydantic-settings>=2.4.0
+redis>=5.0.0
+
+# ── Utils ────────────────────────────────────────────────────
+numpy>=1.24.0
+tqdm>=4.66.0                # progress bars for indexing
+google-generativeai>=0.8.0  # for Gemini image analysis

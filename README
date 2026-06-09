@@ -1,0 +1,156 @@
+# SnapShop v2 — CLIP + FAISS (No SerpApi Needed)
+
+Reverse image shopping using **OpenAI CLIP** + **Meta FAISS** running on your local GPU.
+Zero external API dependencies. Zero CORS issues. Zero cost per search.
+
+---
+
+## How It Works
+
+```
+User uploads photo
+       ↓
+CLIP (ViT-B-32) encodes image → 512-dim vector
+       ↓
+FAISS searches indexed product vectors (cosine similarity)
+       ↓
+Top-K most similar products returned with scores
+       ↓
+Frontend shows products with prices + buy links
+```
+
+---
+
+## Setup — 4 Steps
+
+### Step 1 — Install dependencies
+
+```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+
+# Install (CUDA GPU version)
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+pip install faiss-gpu open-clip-torch Pillow requests
+pip install fastapi uvicorn[standard] python-multipart pydantic pydantic-settings
+
+# CPU-only (slower but works anywhere)
+pip install torch torchvision
+pip install faiss-cpu open-clip-torch Pillow requests
+pip install fastapi uvicorn[standard] python-multipart pydantic pydantic-settings
+```
+
+### Step 2 — Build the FAISS index (run ONCE)
+
+```bash
+python scripts/build_index.py
+```
+
+Expected output:
+```
+Building FAISS index for 20 products…
+  Indexed 10/20 products…
+  Indexed 20/20 products…
+Index built: 20 vectors | 0 skipped
+✅ Index built successfully!
+   Products indexed : 20
+   Time taken       : 12.3s
+   Saved to         : data/products.faiss
+```
+
+### Step 3 — Test it works
+
+```bash
+# Test with a sneaker image
+python scripts/test_search.py --url https://images.unsplash.com/photo-1542291026-7eec264c27ff
+
+# Test text search (CLIP superpower)
+python scripts/test_search.py --text "red ethnic kurta women"
+```
+
+### Step 4 — Start the backend
+
+```bash
+uvicorn backend.main:app --reload
+
+# You'll see:
+# ✅ CLIP + FAISS ready. Server is accepting requests.
+# INFO: Uvicorn running on http://0.0.0.0:8000
+```
+
+---
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/health` | GET | Check CLIP + FAISS status |
+| `/api/search/upload` | POST | Upload image file → find similar |
+| `/api/search/url` | POST | Image URL → find similar |
+| `/api/search/text` | POST | Text query → find similar |
+| `/api/catalog/stats` | GET | Index stats |
+| `/api/catalog/products` | GET | All indexed products |
+| `/api/catalog/rebuild` | POST | Rebuild index from catalog.json |
+| `/docs` | GET | Swagger UI (test endpoints) |
+
+---
+
+## Test via Swagger UI
+
+Go to http://localhost:8000/docs
+Click "Try it out" on any endpoint — no auth needed.
+
+---
+
+## Add More Products
+
+Edit `data/catalog.json` — add entries like:
+
+```json
+{
+  "id": "MY_PRODUCT_001",
+  "title": "Product Name",
+  "price": "₹999",
+  "platform": "Amazon India",
+  "category": "fashion",
+  "buy_url": "https://amazon.in/...",
+  "image_url": "https://example.com/product.jpg",
+  "thumbnail": "https://example.com/product-thumb.jpg"
+}
+```
+
+Then rebuild:
+```bash
+python scripts/build_index.py --force
+```
+
+Or call the API:
+```bash
+curl -X POST http://localhost:8000/api/catalog/rebuild
+```
+
+---
+
+## Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+# → http://localhost:3000
+```
+
+---
+
+## Why CLIP + FAISS > SerpApi
+
+| Feature | SerpApi | CLIP + FAISS |
+|---|---|---|
+| Cost | $75/mo for 5K searches | $0 after setup |
+| CORS issues | Yes (needs backend proxy) | No |
+| Offline | No | Yes |
+| Speed | ~2000ms | ~50ms on GPU |
+| Control | None | Full |
+| Indian catalog | Whatever Google indexes | Your own catalog |
+| Text search | No | Yes (CLIP is multimodal) |
