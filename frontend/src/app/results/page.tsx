@@ -5,7 +5,7 @@ import useImageSearch from "@/hooks/useImageSearch";
 import PlatformResultsList from "@/components/PlatformResultsList";
 import ResultsGrid from "@/components/ResultsGrid";
 import SearchSkeleton from "@/components/SearchSkeleton";
-import { ArrowLeft, Sparkles, Image as ImageIcon, Tag } from "lucide-react";
+import { ArrowLeft, Sparkles, Image as ImageIcon, Tag, ShoppingBag, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import { getBackendRoot } from "@/lib/api";
 
@@ -263,6 +263,35 @@ function ResultsContent() {
                                 </label>
                             </div>
                         </div>
+
+                        {/* Lowest Price Deal Alert */}
+                        {results.lowest_price_deal && (
+                            <div className="mt-6 p-4 bg-green-50 border border-green-200/60 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center text-white shrink-0 shadow-md shadow-green-500/20">
+                                        <ShoppingBag className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-xs font-bold uppercase tracking-wider text-green-800">Absolute Lowest Price Deal Found!</h4>
+                                        <p className="text-sm font-semibold text-gray-900 mt-0.5">
+                                            {results.lowest_price_deal.title}
+                                        </p>
+                                        <p className="text-xs text-gray-500 mt-0.5">
+                                            Available for <span className="font-bold text-green-600 text-sm">{results.lowest_price_deal.price}</span> on <span className="font-semibold text-gray-700">{results.lowest_price_deal.platform}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <a
+                                    href={results.lowest_price_deal.buy_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-green-500/10 hover:shadow-green-500/20 hover:scale-102 shrink-0"
+                                >
+                                    Buy Lowest Price Product
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                </a>
+                            </div>
+                        )}
                     </motion.div>
                 )}
 
@@ -298,7 +327,7 @@ function ResultsContent() {
                 )}
 
                 {/* Empty State for Bargain filter */}
-                {showOnlyBargains && filteredMatches.length === 0 && (
+                {showOnlyBargains && filteredMatches.length === 0 && results.visual_matches && results.visual_matches.length > 0 && (
                     <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -317,6 +346,92 @@ function ResultsContent() {
                         >
                             Reset Filter
                         </button>
+                    </motion.div>
+                )}
+
+                {/* Premium Empty State for No Matches at all */}
+                {!showOnlyBargains && filteredMatches.length === 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="max-w-2xl mx-auto text-center py-16 px-8 bg-white/70 backdrop-blur-xl rounded-3xl border border-gray-100 shadow-xl relative overflow-hidden mt-8"
+                    >
+                        {/* Glowing Background Blob */}
+                        <div className="absolute -top-10 -left-10 w-40 h-40 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+                        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50"></div>
+
+                        <div className="relative z-10">
+                            {/* Graphic Icon Container */}
+                            <div className="w-20 h-20 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/20 rotate-3 hover:rotate-12 transition-transform duration-300">
+                                <ShoppingBag className="w-10 h-10 text-white" />
+                            </div>
+
+                            <h3 className="text-3xl font-black text-gray-900 mb-3 tracking-tight">
+                                Product Not Found
+                            </h3>
+                            <p className="text-gray-500 text-base max-w-md mx-auto mb-8 font-medium leading-relaxed">
+                                We couldn't find any visually similar products from <span className="text-primary-600 font-semibold">trusted, purchaseable e-commerce platforms</span> matching your search.
+                            </p>
+
+                            <div className="h-px bg-gray-100 w-full mb-8"></div>
+
+                            {/* Options to proceed */}
+                            <div className="space-y-6 text-left max-w-lg mx-auto">
+                                <div>
+                                    <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-purple-500" />
+                                        Option 1: Try natural language search
+                                    </h4>
+                                    <form
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            const q = new FormData(e.currentTarget).get("q");
+                                            if (q) router.push(`/results?q=${encodeURIComponent(q.toString())}`);
+                                        }}
+                                        className="relative w-full"
+                                    >
+                                        <input
+                                            type="text"
+                                            name="q"
+                                            placeholder="e.g. red ethnic women kurta under 2000..."
+                                            className="w-full pl-5 pr-28 py-3.5 rounded-2xl border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm transition-shadow hover:shadow-md bg-white"
+                                        />
+                                        <button
+                                            type="submit"
+                                            className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-gray-900 hover:bg-primary-600 text-white rounded-xl flex items-center justify-center text-xs font-bold transition-all shadow-md group cursor-pointer"
+                                        >
+                                            AI Search
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div className="pt-2">
+                                    <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                        <ImageIcon className="w-4 h-4 text-pink-500" />
+                                        Option 2: Try another photo
+                                    </h4>
+                                    <div className="flex flex-col sm:flex-row gap-3">
+                                        <button
+                                            onClick={() => router.push("/")}
+                                            className="flex-grow py-3 bg-white hover:bg-gray-50 text-gray-800 border border-gray-200 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all hover:scale-102 cursor-pointer"
+                                        >
+                                            <ArrowLeft className="w-4 h-4" />
+                                            Go Back & Upload Image
+                                        </button>
+                                        {imageUrl && (
+                                            <button
+                                                onClick={() => router.push(`/describe?imageUrl=${encodeURIComponent(imageUrl)}&imageHash=${encodeURIComponent(imageHash)}`)}
+                                                className="flex-grow py-3 bg-pink-50 hover:bg-pink-100 text-pink-700 border border-pink-200/50 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all hover:scale-102 cursor-pointer animate-pulse"
+                                            >
+                                                <Sparkles className="w-4 h-4 text-pink-500" />
+                                                Analyze Image with AI
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </motion.div>
                 )}
             </main>

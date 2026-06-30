@@ -74,6 +74,12 @@ class IndexStats(BaseModel):
     model:          str
     index_size_kb:  float
 
+class LowCostDeal(BaseModel):
+    title:            str
+    price:            str
+    platform:         str
+    buy_url:          str
+
 class SearchResponse(BaseModel):
     query_image_url:  str
     visual_matches:   list[VisualMatch]
@@ -82,6 +88,7 @@ class SearchResponse(BaseModel):
     cached:           bool = False
     search_id:        str
     low_cost_prediction: Optional[LowCostPrediction] = None
+    lowest_price_deal: Optional[LowCostDeal] = None
 
 class AnalyzeRequest(BaseModel):
     image_url: str

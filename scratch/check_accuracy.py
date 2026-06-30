@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.insert(0, ".")
 from ml.clip_engine import get_engine
 import json
 
@@ -6,7 +9,7 @@ engine = get_engine()
 # Test Case 1: Search by the EXACT image of the Nike shoe
 img_url = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80"
 print(f"\n--- Testing Image Search for: {img_url} ---")
-results = engine.search_by_image_url(img_url)
+results = engine.search_by_image_url(img_url).get("results", [])
 if results:
     for i, res in enumerate(results[:3]):
         print(f"{i+1}. {res['title']} | Score: {res['similarity_score']}")
@@ -14,14 +17,14 @@ if results:
 # Test Case 2: Search by the EXACT image of the Roadster dress
 img_url_dress = "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&q=80"
 print(f"\n--- Testing Image Search for: {img_url_dress} ---")
-results_dress = engine.search_by_image_url(img_url_dress)
+results_dress = engine.search_by_image_url(img_url_dress).get("results", [])
 if results_dress:
     for i, res in enumerate(results_dress[:3]):
         print(f"{i+1}. {res['title']} | Score: {res['similarity_score']}")
 
 # Test Case 3: Search by text "Floral dress"
 print("\n--- Testing Text Search for: 'Floral dress' ---")
-results_text = engine.search_by_text("Floral dress")
+results_text = engine.search_by_text("Floral dress").get("results", [])
 if results_text:
     for i, res in enumerate(results_text[:3]):
         print(f"{i+1}. {res['title']} | Score: {res['similarity_score']}")

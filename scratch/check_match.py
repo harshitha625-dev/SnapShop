@@ -15,7 +15,7 @@ def check_direct_match():
     image_url = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80"
     
     text_vec = engine.embed_text(text)
-    image_vec = engine.embed_image_url(image_url)
+    image_vec = engine.embed_url(image_url)
     
     # Dot product of normalized vectors = Cosine Similarity
     score = np.dot(text_vec[0], image_vec[0])
